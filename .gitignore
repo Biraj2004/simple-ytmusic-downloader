@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# App-specific runtime directories (portable mode)
+bin/
+data/
+downloads/
+
+# PyInstaller / Build
+build/
+dist/
+*.spec
