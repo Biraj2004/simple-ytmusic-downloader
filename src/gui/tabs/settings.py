@@ -308,6 +308,32 @@ class SettingsTab(QWidget):
         self.reset_btn.clicked.connect(self.reset_defaults)
         self.btn_layout.addWidget(self.reset_btn)
 
+        self.btn_layout.addStretch(1)
+
+        self.repo_btn = QPushButton("GitHub Repository", self)
+        self.repo_btn.setIcon(get_svg_icon("ti-brand-github", color="#333333", size=14))
+        self.repo_btn.setFixedHeight(30)
+        self.repo_btn.setCursor(Qt.PointingHandCursor)
+        self.repo_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E8E8E8;
+                border: 1px solid #888888;
+                color: #333333;
+                font-size: 12px;
+                font-family: 'Segoe UI';
+                padding: 0 16px;
+                border-radius: 2px;
+            }
+            QPushButton:hover {
+                background-color: #D8D8D8;
+            }
+        """)
+        from PySide6.QtCore import QUrl
+        from PySide6.QtGui import QDesktopServices
+        from constants import TODO_REPO_URL
+        self.repo_btn.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(TODO_REPO_URL)))
+        self.btn_layout.addWidget(self.repo_btn)
+
         self.layout.addLayout(self.btn_layout)
 
         # Setup workers

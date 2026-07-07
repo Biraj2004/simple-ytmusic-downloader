@@ -58,9 +58,11 @@ To see the downloader in action and learn how to use its features, watch the qui
 #### 1. Prerequisites
 Make sure you have [Python 3.10+](https://www.python.org/downloads/) installed.
 
-#### 2. Install Dependencies
-Clone this repository, open your terminal/command prompt in the project folder, and run:
+#### 2. Clone & Install Dependencies
+Clone the repository and install the required dependencies:
 ```bash
+git clone https://github.com/Biraj2004/simple-ytmusic-downloader.git
+cd simple-ytmusic-downloader
 pip install -r requirements.txt
 ```
 
@@ -81,7 +83,11 @@ If you want to compile the project into a single `.exe` file that runs portably 
    ```bash
    pip install pyinstaller
    ```
-2. Run the packaging command:
+2. Run the packaging command using the provided `.spec` file:
+   ```bash
+   pyinstaller YTMusicDownloader.spec
+   ```
+   *Alternatively, compile directly from the source entry point:*
    ```bash
    pyinstaller --onefile --windowed --name YTMusicDownloader --icon=public/app_icon.ico --add-data "public/app_icon.png;public" --hidden-import PySide6.QtSvg --hidden-import PySide6.QtXml src/main.py
    ```

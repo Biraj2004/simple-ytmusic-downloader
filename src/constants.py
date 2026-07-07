@@ -5,7 +5,7 @@ FFMPEG_DOWNLOAD_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essenti
 
 # Developer links
 TODO_GITHUB_URL = "https://github.com/Biraj2004"
-TODO_REPO_URL   = "https://github.com/Biraj2004/yt-music-downloader"
+TODO_REPO_URL   = "https://github.com/Biraj2004/simple-ytmusic-downloader"
 
 # App info
 APP_NAME    = "YT Music Downloader"
