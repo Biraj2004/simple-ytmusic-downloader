@@ -22,7 +22,7 @@
 To see the downloader in action and learn how to use its features, watch the quick guide below:
 
 <p align="center">
-  <video src="https://github.com/Biraj2004/simple-ytmusic-downloader/raw/main/public/guide.mp4" width="100%" controls>
+  <video src="https://github.com/Biraj2004/simple-ytmusic-downloader/blob/main/public/guide.mp4" width="100%" controls>
     Your browser does not support the video tag.
   </video>
 </p>
