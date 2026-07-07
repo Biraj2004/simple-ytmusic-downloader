@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/Qt-PySide6-green.svg?style=flat&logo=qt&logoColor=white" alt="PySide6 Badge" />
   <img src="https://img.shields.io/badge/Downloader-yt--dlp-red.svg?style=flat" alt="yt-dlp Badge" />
   <img src="https://img.shields.io/badge/Audio%20Encoder-FFmpeg-black.svg?style=flat&logo=ffmpeg&logoColor=white" alt="FFmpeg Badge" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat" alt="License Badge" /></a>
 </p>
 
 ---
@@ -22,7 +23,7 @@
 To see the downloader in action and learn how to use its features, watch the quick guide below:
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/bf968b47-4759-4b0a-890e-3fcda3dd1228" width="500px" height="300px" controls>
+  <video src="https://github.com/user-attachments/assets/bf968b47-4759-4b0a-890e-3fcda3dd1228" width="600" height="360" controls>
     Your browser does not support the video tag.
   </video>
 </p>
@@ -89,4 +90,5 @@ If you want to compile the project into a single `.exe` file that runs portably 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
+
