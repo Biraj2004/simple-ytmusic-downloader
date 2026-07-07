@@ -1,0 +1,543 @@
+\documentclass[12pt]{report}
+\usepackage[a4paper, margin=0.85in]{geometry}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{graphicx}
+
+% Centered wrapping column type for tabularx
+\newcolumntype{C}{>{\centering\arraybackslash\hspace{0pt}}X}
+
+% Disable all word-breaking hyphenation (forces full words to wrap to the next line)
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\sloppy
+
+
+% Line spacing 1.25
+\setstretch{1.25}
+
+% No Paragraph Indentation & No Paragraph Skip
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+% Slate/Grey theme color palette
+\definecolor{primary}{HTML}{1A202C}     % Slate Black
+\definecolor{secondary}{HTML}{4A5568}   % Deep Slate Grey
+\definecolor{codebg}{HTML}{F7FAFC}      % Light Grey Code Background
+\definecolor{bordercolor}{HTML}{CBD5E0}  % Grey Borders
+\definecolor{quoteback}{HTML}{EDF2F7}   % Quote Block Background
+\definecolor{royalpurple}{HTML}{6B46C1}  % Royal Purple color
+
+% Header styles (18pt Chapter titles, centered and capitalized; 14pt Section titles; 12pt Subsection titles)
+\titleformat{\chapter}[block]
+  {\normalfont\fontsize{18}{22}\bfseries\filcenter\color{primary}}
+  {\MakeUppercase{\chaptername}~\thechapter\ -}{0.5em}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{20pt}
+
+\titleformat{\section}
+  {\normalfont\fontsize{14}{18}\bfseries\color{secondary}}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{15pt}{10pt}
+
+\titleformat{\subsection}
+  {\normalfont\fontsize{12}{15}\bfseries\color{secondary}}
+  {\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    filecolor=secondary,      
+    urlcolor=secondary,
+    pdftitle={YouTube Music Downloader Technical Report},
+}
+
+% Code Listings Styling
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small\color{primary},
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{bordercolor},
+    keywordstyle=\color{primary}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{secondary},
+    showstringspaces=false,
+    aboveskip=10pt,
+    belowskip=10pt
+}
+
+% Styled Blockquote Environment
+\newenvironment{resumepitch}{
+    \begin{tcolorbox}[colback=quoteback,colframe=bordercolor,arc=2mm,boxrule=1pt,left=15pt,right=15pt,top=10pt,bottom=10pt]
+    \itshape\color{primary}
+}{
+    \end{tcolorbox}
+}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{tcolorbox}[
+    colback=white,
+    colframe=secondary,
+    arc=4mm,
+    boxrule=2pt, % medium thick border
+    width=\textwidth,
+    height=\textheight,
+    valign=center
+]
+\begin{center}
+    \vspace*{1.2cm}
+    \includegraphics[width=2.5cm]{public/app_icon.png}\\[0.8cm]
+    {\Huge\bfseries\color{primary} YouTube Music Downloader}\\[0.8cm]
+    {\Large\bfseries\color{secondary} Comprehensive Technical Project Report \& Architectural Guide}\\[2cm]
+    
+    \par\noindent\rule{0.5\textwidth}{1.5pt}\\[2cm]
+    
+    {\large Prepared for:}\\[0.2cm]
+    {\large\bfseries Technical Portfolio \& Interview Review}\\[1.5cm]
+    
+    {\large Platform Specifications:}\\[0.2cm]
+    {\large\texttt{Python 3.10+} \textbullet{} \texttt{PySide6 (Qt)} \textbullet{} \texttt{yt-dlp} \textbullet{} \texttt{FFmpeg}}\\[2.5cm]
+    
+    {\large Date: \today}\\[0.4cm]
+    {\large\bfseries\color{royalpurple} Biraj Sarkar}\\[0.6cm]
+\end{center}
+\end{tcolorbox}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\chapter{Executive Summary \& Project Vision}
+
+In desktop software engineering, a primary design challenge is creating a responsive user experience during long-running background tasks. When an application fetches files from the internet or converts audio formats on the main thread, the operating system's window manager marks the program as frozen. This project builds a custom desktop tool to download music from YouTube and YouTube Music. It uses PySide6 to manage layouts and handles heavy work asynchronously in separate threads.
+
+\section{The Core Problems Solved}
+Traditional media downloaders suffer from multiple user experience and technical flaws:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{UI Unresponsiveness}: Initiating downloads freezes the GUI frame, preventing window dragging, cancel requests, or real-time progress checks.
+    \item \textbf{Complex Dependencies}: Audio downloading and post-processing require command line binaries like \texttt{yt-dlp} and \texttt{FFmpeg}. Requiring users to manually download, extract, and append these to their system PATH is a major barrier to entry.
+    \item \textbf{Network and File Instabilities}: Network timeouts, connection drops, and incomplete writes often cause corrupted media files. 
+\end{itemize}
+
+\section{The Project Vision}
+This application is designed to be a modern, self-contained, and highly resilient media downloader. It provides a visual dashboard to manage download queues without requiring command line interactions. By decoupling the GUI from dependency installers and background tasks, the app remains responsive, allowing users to scroll lists, pause queues, and edit configurations while download streams are running.
+
+\begin{resumepitch}
+"I designed and built a portable, multi-threaded desktop downloader for YouTube and YouTube Music using Python and PySide6 (Qt). The application integrates a zero-configuration dependency installer, atomic file operations, real-time stdout parsing via regex, and a custom self-healing download archive cache to ensure efficient, error-resilient downloads without blocking the GUI main thread."
+\end{resumepitch}
+
+\newpage
+\chapter{System Pre-Requisites and Core Competencies}
+
+To understand, debug, or present this project in a professional setting, a candidate must possess deep theoretical knowledge of desktop runtime environments. Below is a detailed breakdown of the theoretical concepts utilized throughout this application:
+
+\section{Advanced Python Runtime and OS Integrations}
+Writing robust system utilities in Python goes beyond basic scripting. This project utilizes several advanced Python concepts:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Object-Oriented Programming (OOP)}: The entire architecture is built on inheritance and polymorphism. For example, custom worker threads inherit from PySide6's C++ wrappers, requiring an understanding of class inheritance, constructor method overrides (\texttt{super().\_\_init\_\_()}), and method binding.
+    \item \textbf{Decorators and Meta-Programming}: Qt uses decorators like \texttt{@Slot()} to connect Python methods to C++ signal dispatchers. Understanding how Python decorators wrap functions and alter metadata is essential to understanding Qt's slot binding.
+    \item \textbf{JSON Serialization and File Operations}: Preferences are saved to disk using Python's serialization libraries. We use context managers (\texttt{with} blocks) to guarantee that file descriptors are safely released back to the OS, even if an exception occurs during reading or writing.
+    \item \textbf{Windows OS Bindings}: We use Python's \texttt{ctypes} library to call C functions inside Windows system DLLs (like \texttt{shell32.dll}). This requires understanding data type conversions between Python types and native C types (e.g. \texttt{wchar\_t*} strings).
+\end{itemize}
+
+\section{Qt Event Loop Mechanics and GUI Responsiveness}
+The user interface is governed by the Qt Event Loop, booted via \texttt{QApplication.exec()}:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{QEventLoop Execution}: The event loop runs in a continuous loop, monitoring the operating system's event queue for keyboard clicks, mouse movements, window dragging, and system repaint requests.
+    \item \textbf{UI Unresponsiveness}: If a long task (like a network request or audio conversion) runs on the main GUI thread, it blocks the event loop. The window manager can no longer dispatch events, which triggers the operating system to mark the window as "Not Responding" and apply a translucent gray overlay on Windows.
+    \item \textbf{Parent-Child Memory Lifecycle}: Qt uses a parent-child relationship tree for memory management. When a parent widget is destroyed, it automatically deletes all its child widgets from the heap. This prevents memory leaks without relying solely on Python's garbage collector.
+\end{itemize}
+
+\section{Subprocess Pipelines and Stream Management}
+Rather than importing libraries directly, this application executes separate compiled binaries inside the operating system using Python's \texttt{subprocess} module:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Standard File Descriptors}: Every process starts with three default channels: Standard Input (\texttt{0 = stdin}), Standard Output (\texttt{1 = stdout}), and Standard Error (\texttt{2 = stderr}). We redirect these channels to read logs in real time.
+    \item \textbf{Pipe Buffer Buffering}: The OS allocates a small memory buffer (typically 64KB on Windows) to transfer data between processes. If a parent redirects stdout but stops reading from it, the buffer fills up. This causes the child process to halt indefinitely, resulting in a deadlock. We avoid this by reading the stream line-by-line using a generator loop.
+    \item \textbf{Channel Merging}: We merge stderr into the stdout channel using \texttt{stderr=subprocess.STDOUT}. This lets us monitor both progress updates and error messages through a single text stream.
+\end{itemize}
+
+\section{Multithreading and the Global Interpreter Lock (GIL)}
+To keep the event loop responsive, we run blocking tasks in separate threads:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Global Interpreter Lock (GIL)}: Python's GIL ensures only one thread executes Python bytecode at a time. However, when a thread makes blocking I/O calls (like waiting for network packets or writing to disk), it releases the GIL. Additionally, CPU-heavy tasks like audio encoding are handled by the external \texttt{FFmpeg} binary, which runs as a separate process outside the Python interpreter, allowing it to utilize multiple CPU cores.
+    \item \textbf{Signal-Slot Thread Serialization}: Qt widgets are not re-entrant, meaning they cannot be modified from background threads. We resolve this by using Qt's \texttt{Signal} and \texttt{Slot} system. When a worker thread emits a signal, Qt serializes it into the main thread's event queue, ensuring all UI updates happen safely on the GUI thread.
+\end{itemize}
+
+\section{Regular Expression (Regex) Engine Operations}
+Scraping output text streams requires regular expressions compiled with Python's \texttt{re} module:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Finite Automata Matching}: The regex engine searches for patterns in text. We use compiled patterns to avoid recompiling them inside loops, which improves performance.
+    \item \textbf{Capturing Groups and Character Classes}: We use capturing groups (enclosed in parentheses) to extract specific text values, and character classes (like \texttt{\textbackslash{}d} for digits and \texttt{\textbackslash{}S} for non-whitespace characters) to match variable strings.
+    \item \textbf{Greedy vs. Lazy Matching}: We use lazy operators to prevent matching too much text, ensuring our expressions match only the intended download percentage and speed values.
+\end{itemize}
+
+\newpage
+\chapter{In-Depth File-by-File Architecture}
+
+The codebase follows a strict Separation of Concerns (SoC) pattern. Below is an explanation of every file in the directory structure:
+
+\section{Infrastructure and Foundations}
+
+\subsection{simple-ytmusic-downloader.py}
+This is the root-level launcher script. Its primary responsibility is setting up module search paths at startup. It adds the local \texttt{src/} folder to Python's module path (\texttt{sys.path}), which allows the application to resolve absolute imports correctly whether run directly as source files or packaged inside a PyInstaller executable.
+
+\subsection{YTMusicDownloader.spec}
+The PyInstaller compilation specification file. It instructs PyInstaller how to bundle the application into a single standalone executable:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Entry Point}: Points to the main bootstrapper script \texttt{src/main.py}.
+    \item \textbf{Data Bundles}: Packs static assets like the application PNG icon (\texttt{public/app\_icon.png}) to the distribution.
+    \item \textbf{Hidden Imports}: Manually registers dependencies like \texttt{PySide6.QtSvg} and \texttt{PySide6.QtXml}. These modules are loaded dynamically at runtime via custom paint classes and might otherwise be omitted by PyInstaller's static code analyzer.
+    \item \textbf{Executable Config}: Disables console wrappers (\texttt{console=False}) for windowed execution, applies compression flags, and binds the custom window icon resource.
+\end{itemize}
+
+\subsection{src/utils/paths.py}
+This utility is the central authority for path resolution. It handles portable execution:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Script Mode}: When running as source files, directories are resolved relative to the local Python script.
+    \item \textbf{Frozen Mode}: When compiled with PyInstaller, the application is unpacked into a temporary folder (\texttt{sys.\_MEIPASS}). The path resolver detects this and points user configurations, databases, and downloads to the directory where the executable file actually resides.
+\end{itemize}
+
+\subsection{src/config.py}
+This class handles user preferences, storing them in \texttt{data/config.json}. It manages settings like output directories, filename patterns, and metadata options. It uses standard JSON serialization to save and load preferences.
+
+\subsection{src/utils/logger.py}
+Configures a rolling log file at \texttt{data/logs/app.log}. It uses a \texttt{RotatingFileHandler} capped at 2MB per file with up to 3 backups, ensuring the logs do not grow indefinitely.
+
+\subsection{src/utils/net.py}
+Implements an HTTP client with built-in retry logic. It configures the \texttt{requests} library with a backoff strategy, retrying failed requests when encountering transient connection issues.
+
+\subsection{src/main.py}
+This is the main application entry point and bootstrap script. It initializes the PySide6 runtime via \texttt{QApplication}, sets application-wide styles and details, handles setup window logic, and opens the main dashboard window. On Windows systems, it uses ctypes to configure the system Taskbar \texttt{AppUserModelID}, ensuring standard grouping for custom executables.
+
+\subsection{src/constants.py}
+Stores all global static variables and default values in a centralized location. It houses URL endpoints for downloading \texttt{yt-dlp} and \texttt{FFmpeg} binaries, default application configurations, custom visual stylesheet parameters, and standard layout dimensions. Centralizing these values prevents raw magic strings throughout the codebase.
+
+\section{Dependency Management Layer}
+
+\subsection{src/deps/checker.py}
+Checks if the required external binaries (\texttt{yt-dlp.exe}, \texttt{ffmpeg.exe}, and \texttt{ffprobe.exe}) are available in the local \texttt{bin/} folder and functional. It runs quick checks like \texttt{yt-dlp --version} inside a subprocess to verify the files work correctly.
+
+\subsection{src/deps/fetcher.py}
+Implements \texttt{FetchWorker(QThread)} to handle downloading and extracting missing dependencies in a background thread, preventing the UI from freezing during the download process.
+
+\section{Download Engine}
+
+\subsection{src/engine/queue\_item.py}
+Defines the queue item structures, including an enum representing states like \texttt{QUEUED}, \texttt{DOWNLOADING}, \texttt{DONE}, \texttt{ERROR}, and \texttt{PAUSED\_NETWORK}.
+
+\subsection{src/engine/metadata.py}
+Runs a fast query using \texttt{yt-dlp.exe --dump-json --flat-playlist} inside a subprocess to extract playlist titles and track lists before the download begins, allowing the UI to populate the queue layout accurately.
+
+\subsection{src/engine/archive.py}
+Implements the download cache database. It reconciles the playlist's local archive cache by checking if downloaded tracks still exist in the output folder. If a user deletes an MP3 file manually, the script removes its ID from the archive cache so it can be re-downloaded.
+
+\subsection{src/engine/worker.py}
+Contains \texttt{DownloadWorker(QThread)}, which launches \texttt{yt-dlp.exe} inside a subprocess. It monitors the subprocess's standard output stream in real-time, parsing it with regex to emit UI updates for progress, speed, and track transitions.
+
+\section{Graphical User Interface (GUI)}
+
+\subsection{src/gui/icons.py}
+A lightweight XML vector graphics engine. It stores standard Tabler Icon vector strings as XML inside a dictionary and paints them onto transparent \texttt{QPixmap} assets, eliminating external icon file dependencies.
+
+\subsection{src/gui/widgets/progress\_bar.py}
+A custom widget subclassing \texttt{QWidget}. It layouts a descriptive header label alongside a progress indicator, providing a clean display.
+
+\subsection{src/gui/widgets/queue\_row.py}
+Represents a row in the download queue. Displays status indicators (loader animations, checkmarks, warning icons), track titles, download progress, and exposes buttons to remove items or retry failed runs.
+
+\subsection{src/gui/widgets/dep\_card.py}
+Displays the download status, version details, and maintenance tools for \texttt{yt-dlp} and \texttt{FFmpeg} inside the settings panel.
+
+\subsection{src/gui/setup\_window.py}
+A frameless setup dialog shown on startup if binaries are missing. It runs \texttt{FetchWorker}, updates progress bars, and boots the main window once dependencies are verified.
+
+\subsection{src/gui/tabs/downloader.py}
+The primary interface. Manages the URL entry form, directory destination labels, the scrollable download queue, and displays the overall and item progress bars.
+
+\subsection{src/gui/tabs/about.py}
+Displays application information, version metrics, licensing terms, and developer contact handles. It features an interactive, styled layout that aligns with the visual design of the settings and downloader panels.
+
+\subsection{src/gui/tabs/settings.py}
+Provides controls for changing the download folder, toggling metadata embedding, choosing filename patterns, and managing local updates.
+
+\subsection{src/gui/main\_window.py}
+The orchestrator of the entire application. It manages the frameless window layout, mouse drag handlers, and coordinates the sequential download worker threads.
+
+\newpage
+\chapter{Core Engineering Concepts Explained}
+
+\section{The Qt Event Loop and Thread Isolation}
+A desktop application's user interface runs on a single thread called the main thread or GUI thread. This thread is governed by a central event loop (\texttt{QEventLoop}), which executes in a continuous loop:
+\begin{lstlisting}[language=Python]
+# Simplified representation of the Qt Event Loop
+while app_is_running:
+    event = get_next_event()
+    dispatch_event(event)
+    process_paint_events()
+\end{lstlisting}
+If a long-running operational task (such as downloading a large audio file or converting a media stream using FFmpeg) is executed directly on the main thread, the loop is blocked. Repaint requests are queued but not processed, causing the operating system's window manager to mark the process as frozen and apply a "Not Responding" overlay.
+
+To avoid this, we isolate heavy operations in background worker threads subclassing \texttt{QThread}. Since Qt widgets are not thread-safe and cannot be directly modified from background threads, we use Qt's \textbf{Signals and Slots} architecture:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Queued Connections}: When a signal is emitted across thread boundaries, Qt serializes the arguments and posts a custom event to the main thread's event queue. The main thread picks up this event and executes the slot, ensuring thread-safe GUI updates.
+    \item \textbf{Python GIL Considerations}: Python's Global Interpreter Lock (GIL) limits thread execution, but since our downloading threads release the GIL during I/O operations (like network polling) and delegate heavy encoding to separate child processes (\texttt{ffmpeg.exe}), we achieve efficient concurrent execution without blocking the user interface.
+\end{itemize}
+
+\begin{resumepitch}
+"I resolved main-thread blocking by running heavy download tasks inside isolated \texttt{QThread} workers. Thread synchronization is managed using Qt's thread-safe Signal-Slot system with queued connections, allowing the main thread's event loop to remain fully responsive to user input and paint events while background threads scrape network streams."
+\end{resumepitch}
+
+\section{Subprocess Piping and Stream Scraping}
+Rather than linking to heavy, unstable download wrappers, the engine launches compiled external binaries inside the operating system using Python's \texttt{subprocess} module:
+\begin{lstlisting}[language=Python]
+self._process = subprocess.Popen(
+    args,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True,
+    encoding="utf-8",
+    errors="replace"
+)
+\end{lstlisting}
+This pipeline architecture involves several technical challenges:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Preventing Process Deadlocks}: The operating system allocates a restricted buffer (typically 64KB on Windows) to transfer stream data between the child subprocess and the parent application. If the child writes to standard output while the parent is busy and not reading, the buffer fills up. This freezes the child process. We resolve this by running a generator loop that reads stdout line-by-line in real time.
+    \item \texttt{stderr} redirection: Merging the standard error and standard output streams using \texttt{stderr=subprocess.STDOUT} lets us monitor both progress metrics and error exceptions through a single stream.
+    \item \textbf{Regex Parser Scraper}: Standard progress lines from \texttt{yt-dlp} (formatted as \texttt{[download]  45.3\% of \textasciitilde{}10.42MiB at 4.22MiB/s}) are scraped using regular expressions to extract real-time download percentages and transfer speed values.
+\end{itemize}
+
+\section{Atomic File Integrity}
+Writing download packets directly to the final destination file is risky. If a download is interrupted by a network drop, a crash, or a power failure, it leaves a corrupted, partially written file on the disk. 
+
+To prevent this, the engine implements an atomic file write pattern:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Staging Files}: The file is initially downloaded to a temporary location using a unique suffix (such as \texttt{.part} or \texttt{.ytdl}).
+    \item \textbf{Validation and Assembly}: Once the raw stream is successfully saved, post-processors merge the streams and embed the ID3 tags.
+    \item \textbf{Atomic filesystem Swap}: After verifying that the file is not empty and the download succeeded, the engine moves the temporary file to its final destination using \texttt{os.replace()} or \texttt{shutil.move()}. On Windows, this translates to the Win32 API system call \texttt{MoveFileEx} with the \texttt{MOVEFILE\_REPLACE\_EXISTING} flag, which guarantees that the destination file is replaced atomically at the filesystem level.
+\end{itemize}
+
+\section{Vector Graphics Painting}
+Packaging separate PNG or JPEG assets for UI icons increases executable sizes and causes issues on high-DPI (Retina/4K) displays where raster images appear pixelated.
+
+The application avoids this by utilizing a runtime vector graphics renderer:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{In-Memory Storage}: SVG paths from Tabler Icons are stored directly as XML strings inside a Python dictionary.
+    \item \textbf{Device-Independent Painting}: The app loads these XML strings into a \texttt{QSvgRenderer} and paints them onto transparent \texttt{QPixmap} assets using a \texttt{QPainter} at runtime.
+    \item \textbf{Dynamic Coloring and Scaling}: Icons scale cleanly to match any screen resolution without pixelation, and their fill colors can be modified dynamically at runtime.
+\end{itemize}
+
+\section{Subprocess Execution Parameters and Command Arguments}
+To interact with the YouTube Music streaming endpoints, the engine executes external command line tools rather than loading Python packages directly. This requires configuring specific arguments for both \texttt{yt-dlp} and \texttt{FFmpeg}:
+
+\subsection{yt-dlp Arguments for Metadata Queries}
+Before starting a download, the app needs to know if the target URL is a single track or a playlist, and retrieve titles and index lists. We run a fast metadata dump inside a subprocess:
+\begin{lstlisting}[language=bash]
+yt-dlp.exe --dump-json --flat-playlist "https://..."
+\end{lstlisting}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{--dump-json}: Instructs the executable to output the parsed track layout structure in raw JSON format to standard output.
+    \item \texttt{--flat-playlist}: Prevents the resolver from querying individual track pages, completing the entire index dump in a few milliseconds.
+\end{itemize}
+
+\subsection{yt-dlp Arguments for Media Downloads}
+When executing a download item, the engine constructs a detailed command line layout:
+\begin{lstlisting}[language=bash]
+yt-dlp.exe --newline --verbose --no-playlist \
+  --extract-audio --audio-format mp3 --audio-quality 0 \
+  --add-metadata --embed-thumbnail \
+  --download-archive "archive_file" \
+  -o "output_template" "url"
+\end{lstlisting}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{--newline}: Forces progress reports to print on new lines rather than carriage returns (\texttt{\textbackslash{}r}), allowing our stream reader to scrape progress values line-by-line.
+    \item \texttt{--no-playlist}: Restricts processing to the single target track when playlist URLs are queried individually.
+    \item \texttt{--extract-audio}: Converts the downloaded stream to an audio container.
+    \item \texttt{--audio-format mp3}: Specifies MP3 encoding for the output container.
+    \item \texttt{--audio-quality 0}: Selects the highest quality profile for variable bitrate (approx. 256--320 kbps).
+    \item \texttt{--add-metadata}: Employs post-processors to write ID3 tag elements (such as artist, title, album) directly into the MP3 container.
+    \item \texttt{--embed-thumbnail}: Downloads and embeds the video artwork as the MP3 cover art.
+    \item \texttt{--download-archive}: Checks a local text database before downloading. If the track's YouTube ID is found, it skips the download immediately, saving bandwidth.
+\end{itemize}
+
+\subsection{FFmpeg Parameters and Overrides}
+\texttt{yt-dlp} spawns \texttt{ffmpeg.exe} automatically as a post-processor wrapper. It uses LAME MP3 library arguments under the hood:
+\begin{lstlisting}[language=bash]
+ffmpeg.exe -i "input_stream" -codec:a libmp3lame \
+  -aq 0 -id3v2_version 3 "output.mp3"
+\end{lstlisting}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{-codec:a libmp3lame}: Directs FFmpeg to use the LAME MP3 encoding engine.
+    \item \texttt{-aq 0}: Requests Variable Bitrate (VBR) Quality 0, yielding maximum audio fidelity.
+    \item \texttt{-id3v2\_version 3}: Writes metadata using the ID3v2.3 standard, ensuring compatibility with Windows Media Player, iTunes, and mobile media libraries.
+\end{itemize}
+
+\section{Interactive Play, Pause, Resume, and Cancel Lifecycle}
+Managing a background subprocess queue requires a clear state machine that handles user interactions gracefully:
+
+\subsection{Play (Start Queue)}
+When a user clicks "Start queue", the main controller spawns the worker thread. The worker steps through items marked as queued and launches the \texttt{yt-dlp} subprocess. The GUI remains responsive, letting the user monitor the overall progress.
+
+\subsection{Pause}
+When the user clicks "Pause", the main thread calls:
+\begin{lstlisting}[language=Python]
+self.current_worker.request_cancel()
+\end{lstlisting}
+The background worker thread intercepts this and immediately terminates the active \texttt{yt-dlp} subprocess using \texttt{process.terminate()} or \texttt{process.kill()}. 
+The thread's \texttt{finally} block cleans up any partially downloaded temporary files (such as \texttt{.part} or \texttt{.ytdl} files) on disk. The queue remains on screen, and the progress bars stay visible, showing the exact state where the download was paused.
+
+\subsection{Resume}
+When the user clicks "Start queue" again, the application resets the paused flag and restarts the queue loop. The engine skips already completed tracks by reading the archive file, and resumes downloading exactly where it was interrupted.
+
+\subsection{Cancel}
+When the user clicks "Cancel all", the active subprocess is terminated immediately, the entire queue list is cleared from screen and memory, and the progress panels are hidden, returning the UI to the clean starting layout.
+
+\newpage
+\chapter{Architectural Trade-Offs}
+
+The table below describes the technology choices made during development:
+
+\vspace{10pt}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{|C|C|C|}
+\hline
+\textbf{Technology Choice} & \textbf{Why We Used It} & \textbf{Why We Rejected the Alternatives} \\ \hline
+PySide6 (Qt) & Native C++ performance, modern layouts. & Tkinter looks dated. Electron consumes too much RAM. \\ \hline
+yt-dlp Subprocess & Crash isolation, easy binary updates. & Direct Python import leads to memory leaks. \\ \hline
+Custom SVG Icons & Crisp vector icons, small file size. & PNG assets or QtAwesome add file bloat. \\ \hline
+Gyan.dev FFmpeg & Optimized Windows builds. & Complete FFmpeg bundles are unnecessarily large. \\ \hline
+\end{tabularx}
+\vspace{10pt}
+
+\section{Detailed Analysis of Choices}
+
+\subsection{PySide6 vs Electron}
+Electron bundles a full Chromium browser and Node.js runtime, which increases the executable size to over 150MB and consumes a minimum of 100-150MB of idle RAM. PySide6 accesses native C++ libraries directly, keeping our application size small, using only 35MB of RAM, and rendering animations smoothly.
+
+\subsection{yt-dlp Subprocess vs Python Import}
+Importing \texttt{yt-dlp} as a Python library binds the runtime to Python's garbage collector. It is prone to memory leaks because underlying C-extensions do not always release memory back to the OS. Spawning it via \texttt{subprocess.Popen} separates the memory pools, meaning any memory leaks are cleaned up by the OS when the subprocess exits.
+
+\subsection{Custom SVG Icons vs QtAwesome}
+QtAwesome bundles massive FontAwesome font files, which increases application startup latency as the operating system loads the fonts into memory. Our custom SVG parser uses lightweight XML strings directly, resolving icons instantly with zero disk overhead.
+
+\newpage
+\chapter{Edge Cases Handled}
+
+\section{Windows File Locking}
+Windows locks open files. If we try to replace a file while another program is using it, the OS returns a \texttt{PermissionError}. We handle this by closing all read handles and explicitly deleting destination files before renaming temporary files.
+
+\section{Variable Bitrate Estimation}
+YouTube Music uses variable bitrates, which makes file size estimation imprecise. The download tool prefixes these sizes with a tilde character (\textasciitilde{}). We configured our regex patterns with an optional tilde match so progress parsing works for both exact and estimated sizes.
+
+\section{Network Interruptions}
+If a connection drops, the subprocess reports a timeout. The application intercepts this, pauses the active queue, and runs automatic retries with an exponential delay (3, 6, 12, and 24 seconds) before marking the task as paused.
+
+\section{Taskbar Icon Integration}
+When launching Python GUIs, Windows often groups the taskbar icon under the generic Python executable. We resolve this by calling the Windows Shell API using \texttt{ctypes} to register a unique Application User Model ID on boot, ensuring the app displays its custom icon in the taskbar.
+
+\section{Archive Database Reconciliation}
+If a user manually deletes a file from their download directory, \texttt{yt-dlp}'s default archive will still treat it as downloaded and skip it. We cross-reference the archive database with the actual output files on startup. If a file is missing, we remove its ID from the archive, forcing a clean re-download of only that file.
+
+\section{Settings Tab Syncing}
+When a user updates their download directory in the Settings tab, the Downloader tab needs to update its labels immediately. We implemented a two-way synchronization mechanism using a custom \texttt{config\_changed} signal, ensuring both views stay in sync.
+
+\newpage
+\chapter{Technical Interview Q\&A}
+
+\section[Question 1]{Q1: Why did you choose QThread over Python's built-in threading, multiprocessing, or asyncio?}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{asyncio} runs cooperative multitasking on its own loop, which conflicts with PySide6's C++ event loop (\texttt{QEventLoop}).
+    \item \textbf{multiprocessing} spawns separate processes, which adds significant memory overhead and slow start times.
+    \item \textbf{QThread} is native to Qt, integrates seamlessly with its event loop, and supports thread-safe signal/slot communication.
+\end{itemize}
+
+\section[Question 2]{Q2: Qt widgets are not thread-safe. How does your application prevent memory access violations and race conditions when background threads need to update the UI?}
+Background threads do not hold references to UI widgets. All communication is done by emitting Qt \texttt{Signals}. Because the threads operate in different contexts, Qt uses a \textbf{Queued Connection} to serialize and pass parameters to the main thread's event loop, where they are safely processed.
+
+\section[Question 3]{Q3: What is the Python Global Interpreter Lock (GIL), and does it limit the performance of your download queue?}
+The GIL prevents multiple native threads from executing Python bytecodes at the same time. However, our application is I/O-bound (network and file writing), during which the interpreter automatically releases the GIL. Additionally, CPU-heavy tasks like audio encoding are handled by the external \texttt{FFmpeg} binary, which runs as a separate process outside the Python interpreter.
+
+\section[Question 4]{Q4: When running yt-dlp via subprocess.Popen, how do you prevent subprocess pipe deadlocks?}
+If standard output is redirected but not read, the OS pipe buffer can fill up and halt the subprocess. We prevent this by reading the output stream line-by-line in real-time using a generator loop rather than calling blocking methods like \texttt{wait()} or \texttt{communicate()}.
+
+\section[Question 5]{Q5: How did you handle the Windows Command Prompt flash bug when spawning subprocesses?}
+Spawning subprocesses in windowed mode on Windows can cause console windows to flash on the screen. We prevent this by passing the \texttt{CREATE\_NO\_WINDOW} flag to \texttt{subprocess.Popen}, which instructs the Windows kernel to execute the process silently.
+
+\section[Question 6]{Q6: Why did you register an AppUserModelID using ctypes in main.py?}
+By default, Windows groups active windows under the generic Python executable icon in the taskbar. We use \texttt{ctypes} to register a unique AppID at boot, forcing Windows to display our custom icon in the taskbar.
+
+\section[Question 7]{Q7: How does the dependency management system handle version checks for FFmpeg without downloading the entire binary?}
+We query a small text file containing the latest release version string from Gyan.dev. We compare this string with the version of the local \texttt{ffmpeg.exe} binary and only download the ZIP archive if they do not match.
+
+\section[Question 8]{Q8: How does your database cache reconcile changes?}
+We use a custom reconciliation script. It reads the local archive database file and cross-references it with the actual files in the download folder. If a file is missing, its entry is removed from the archive database, forcing a re-download.
+
+\section[Question 9]{Q9: What happens when the user exits the app while a download is running?}
+If a user closes the window, the \texttt{MainWindow.closeEvent()} is triggered. The app intercepts this event, sends a cancel request to the active worker thread, terminates the running \texttt{yt-dlp} subprocess, cleans up incomplete files on disk, and shuts down the thread pool safely before exiting.
+
+\section[Question 10]{Q10: Why did you style the application using the Fusion style instead of native OS styles?}
+Native operating system styles on Windows can look inconsistent across different versions (Windows 10 vs 11). The Qt Fusion style provides a clean, neutral flat layout. We customize it using stylesheet directives (QSS) to build a consistent dark theme that renders identically on any version of Windows.
+
+\section[Question 11]{Q11: How do you handle file naming conflicts if a file with the same name already exists in the destination folder?}
+By default, \texttt{yt-dlp} will check if a file exists. If it has already been downloaded completely, it skips it. If it was partially downloaded, it resumes from the last byte. We also configure our database cache to prevent re-processing identical files, reducing unnecessary disk operations.
+
+\section[Question 12]{Q12: How do you ensure the setup window automatically closes and opens the main window?}
+The setup window runs the dependency fetcher thread. We connect the thread's \texttt{finished} signal to a slot on the setup window. When the download completes successfully, the slot triggers \texttt{self.accept()}, which closes the setup window and returns control to the main bootstrapper, launching the main dashboard.
+
+\section[Question 13]{Q13: How do you handle High DPI Scaling in PySide6?}
+In Qt6, high-DPI scaling is enabled automatically by default. The framework queries the operating system for the screen's logical DPI value and scales widget geometries, layouts, and fonts accordingly. To support crisp image assets, we paint vector SVGs onto pixmaps inside our custom icon engine.
+
+\section[Question 14]{Q14: How does Python's standard requests module handle timeouts, and what are the risks if timeouts are omitted?}
+By default, \texttt{requests} calls block indefinitely if the remote server does not respond. If a user loses internet connectivity while the app is fetching update metadata, the request thread hangs forever, leaking system descriptors. We resolve this by enforcing a strict 10-second timeout on all network queries.
+
+\section[Question 15]{Q15: How did you design the modular Setup window flow to prevent memory leaks?}
+Before launching the main window, we create the setup dialog inside a local scope. Once setup finishes successfully, we call \texttt{setup.deleteLater()} and allow the dialog object to go out of scope. Python's garbage collector and Qt's parent-child hierarchy then release the window assets from RAM before the main dashboard is loaded.
+
+\section[Question 16]{Q16: How does the application handle multiple concurrent download items in the queue?}
+We process the queue sequentially. Spawning multiple concurrent downloads on consumer network connections can trigger IP bans or rate-limits from YouTube. Sequential execution keeps downloads stable. When a worker thread completes a task, the main controller receives a success signal and triggers the next item in the queue.
+
+\section[Question 17]{Q17: If yt-dlp prints output in a localized format, how does your regex engine maintain compatibility?}
+We force the subprocess to write output in English. We pass environment variables (such as setting \texttt{LANG=en\_US.UTF-8}) directly to the child process environment map inside \texttt{subprocess.Popen}. This ensures all status reports use standard English labels, making regex stream parsing reliable.
+
+\section[Question 18]{Q18: How does the application handle unicode characters and non-ASCII character sets (e.g. Asian scripts, Cyrillic, or emojis) in track titles and download paths on Windows?}
+Windows environments historically use UTF-16 internally, while subprocess streams default to localized ANSI pages (such as CP1252 or Shift-JIS) depending on the system locale settings. When a track title containing non-ASCII characters is piped from \texttt{yt-dlp.exe}, reading the stream using standard ASCII or ANSI decoding causes a \texttt{UnicodeDecodeError} and crashes the worker thread.
+
+We resolve this by:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{UTF-8 stream enforcement}: Enforcing UTF-8 encoding directly in the subprocess environment maps.
+    \item \textbf{Pipe stream overrides}: Setting \texttt{text=True, encoding="utf-8", errors="replace"} in \texttt{subprocess.Popen}, which instructs the Python runtime to handle invalid bytes gracefully.
+    \item \textbf{Windows filename normalization}: Passing files to standard system calls using Python's native unicode string handling, which bypasses legacy Windows MAX\_PATH limits and handles unicode paths correctly at the operating system kernel level.
+\end{itemize}
+
+\newpage
+\chapter{Future Roadmap \& Professional Improvements}
+
+\section{Database Migrations}
+Currently, the application caches user preferences in a JSON flat file. While this is simple, it can become slow as the download queue history grows. A future enhancement is migrating this cache to an embedded SQLite database. This will allow for faster queries, structured histories, and better indexing of downloaded playlist items.
+
+\section{Proxy and SOCKS5 Configurations}
+For users on restricted networks or who require privacy, adding SOCKS5 and HTTP proxy support in the Settings panel is a key goal. We can achieve this by passing custom \texttt{--proxy} parameters directly to the underlying \texttt{yt-dlp} subprocess.
+
+\section{CI/CD Automated Deployment Pipelines}
+We plan to set up GitHub Actions pipelines to automate compilation. Every time a new release tag is pushed to the repository, the pipeline will build binaries for Windows (using PyInstaller), macOS (generating a packaged \texttt{.app} bundle), and Linux (creating an AppImage), uploading them automatically to GitHub Releases.
+
+\section{Unit and Integration Testing}
+We intend to write automated unit tests using the \texttt{pytest-qt} plugin. This will allow us to simulate user button clicks, verify text entry changes, and mock network calls to ensure updates do not break existing features.
+
+\section{Memory and Thread Profiling}
+We plan to integrate Python's native \texttt{cProfile} and PySide6's memory debugging tools to profile allocation layouts. This will help identify any hidden memory leaks, optimize layout reflows, and ensure the background threads exit cleanly without leaving orphaned subprocess handles in the operating system.
+
+\end{document}
