@@ -129,7 +129,10 @@ SVG_ICONS = {
     """,
     "ti-music": """
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 3v13a4 4 0 1 0 2 3.5v-13.5l11-2v13a4 4 0 1 0 2 3.5v-14.5z" />
+        <circle cx="6" cy="17" r="3" />
+        <circle cx="16" cy="17" r="3" />
+        <path d="M9 17v-13h10v13" />
+        <path d="M9 8h10" />
     </svg>
     """,
     "ti-copy": """
@@ -137,44 +140,64 @@ SVG_ICONS = {
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
     </svg>
+    """,
+    "win-min": """
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="12" x2="20" y2="12" />
+    </svg>
+    """,
+    "win-max": """
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="5" width="14" height="14" />
+    </svg>
+    """,
+    "win-restore": """
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="8" width="12" height="12" />
+        <path d="M8 8v-4h12v12h-4" />
+    </svg>
+    """,
+    "win-close": """
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="6" y1="6" x2="18" y2="18" />
+        <line x1="6" y1="18" x2="18" y2="6" />
+    </svg>
     """
 }
 
-def get_svg_icon(name: str, color: str = "#333333", size: int = 16) -> QIcon:
-    """Renders a Tabler SVG icon with a specified color and size."""
-    if name not in SVG_ICONS:
-        return QIcon()
-    
-    svg_str = SVG_ICONS[name]
-    # Replace 'currentColor' with the specific color hex
-    svg_str_colored = svg_str.replace("currentColor", color)
-    
-    renderer = QSvgRenderer(QByteArray(svg_str_colored.encode("utf-8")))
-    
-    pixmap = QPixmap(size, size)
-    pixmap.fill(Qt.transparent)
-    
-    painter = QPainter(pixmap)
-    renderer.render(painter)
-    painter.end()
-    
-    return QIcon(pixmap)
-
 def get_svg_pixmap(name: str, color: str = "#333333", size: int = 16) -> QPixmap:
-    """Renders a Tabler SVG icon as a QPixmap."""
+    """Renders a Tabler SVG icon as a QPixmap with High DPI support."""
     if name not in SVG_ICONS:
         return QPixmap()
     
+    # Get Device Pixel Ratio (DPR) for high DPI screens
+    from PySide6.QtWidgets import QApplication
+    dpr = 1.0
+    app = QApplication.instance()
+    if app:
+        screen = app.primaryScreen()
+        if screen:
+            dpr = screen.devicePixelRatio()
+            
     svg_str = SVG_ICONS[name]
     svg_str_colored = svg_str.replace("currentColor", color)
     
     renderer = QSvgRenderer(QByteArray(svg_str_colored.encode("utf-8")))
     
-    pixmap = QPixmap(size, size)
+    scaled_size = int(size * dpr)
+    pixmap = QPixmap(scaled_size, scaled_size)
     pixmap.fill(Qt.transparent)
+    pixmap.setDevicePixelRatio(dpr)
     
     painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
+    painter.setRenderHint(QPainter.SmoothPixmapTransform)
     renderer.render(painter)
     painter.end()
     
     return pixmap
+
+def get_svg_icon(name: str, color: str = "#333333", size: int = 16) -> QIcon:
+    """Renders a Tabler SVG icon with a specified color and size, with High DPI support."""
+    pixmap = get_svg_pixmap(name, color, size)
+    return QIcon(pixmap)

@@ -69,16 +69,14 @@ class MainWindow(QMainWindow):
         self.btn_layout.setSpacing(0)
 
         # Minimise Button
-        self.min_btn = QPushButton("—", self.btn_container)
+        self.min_btn = QPushButton(self.btn_container)
+        self.min_btn.setIcon(get_svg_icon("win-min", color="#FFFFFF", size=10))
         self.min_btn.setFixedSize(36, 30)
         self.min_btn.setCursor(Qt.PointingHandCursor)
         self.min_btn.setStyleSheet("""
             QPushButton {
                 background: transparent;
-                color: #FFFFFF;
                 border: none;
-                font-size: 11px;
-                font-family: 'Segoe UI';
             }
             QPushButton:hover {
                 background-color: rgba(255, 255, 255, 0.2);
@@ -88,16 +86,14 @@ class MainWindow(QMainWindow):
         self.btn_layout.addWidget(self.min_btn)
 
         # Maximise/Restore Button
-        self.max_btn = QPushButton("□", self.btn_container)
+        self.max_btn = QPushButton(self.btn_container)
+        self.max_btn.setIcon(get_svg_icon("win-max", color="#FFFFFF", size=10))
         self.max_btn.setFixedSize(36, 30)
         self.max_btn.setCursor(Qt.PointingHandCursor)
         self.max_btn.setStyleSheet("""
             QPushButton {
                 background: transparent;
-                color: #FFFFFF;
                 border: none;
-                font-size: 13px;
-                font-family: 'Segoe UI';
             }
             QPushButton:hover {
                 background-color: rgba(255, 255, 255, 0.2);
@@ -107,16 +103,14 @@ class MainWindow(QMainWindow):
         self.btn_layout.addWidget(self.max_btn)
 
         # Close Button
-        self.close_btn = QPushButton("✕", self.btn_container)
+        self.close_btn = QPushButton(self.btn_container)
+        self.close_btn.setIcon(get_svg_icon("win-close", color="#FFFFFF", size=10))
         self.close_btn.setFixedSize(36, 30)
         self.close_btn.setCursor(Qt.PointingHandCursor)
         self.close_btn.setStyleSheet("""
             QPushButton {
                 background: transparent;
-                color: #FFFFFF;
                 border: none;
-                font-size: 12px;
-                font-family: 'Segoe UI';
             }
             QPushButton:hover {
                 background-color: #C42B1C;
@@ -218,11 +212,11 @@ class MainWindow(QMainWindow):
     def toggle_maximize(self):
         if self.is_maximized:
             self.showNormal()
-            self.max_btn.setText("□")
+            self.max_btn.setIcon(get_svg_icon("win-max", color="#FFFFFF", size=10))
             self.is_maximized = False
         else:
             self.showMaximized()
-            self.max_btn.setText("❐")
+            self.max_btn.setIcon(get_svg_icon("win-restore", color="#FFFFFF", size=10))
             self.is_maximized = True
 
     # --- Sizing and Position Persistence ---
