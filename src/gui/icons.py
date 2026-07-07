@@ -1,6 +1,6 @@
 from PySide6.QtGui import QIcon, QPixmap, QPainter
 from PySide6.QtSvg import QSvgRenderer
-from PySide6.QtCore import QByteArray, QSize, Qt
+from PySide6.QtCore import QByteArray, QSize, Qt, QRectF
 
 SVG_ICONS = {
     "ti-download": """
@@ -184,7 +184,8 @@ def get_svg_pixmap(name: str, color: str = "#333333", size: int = 16) -> QPixmap
     
     renderer = QSvgRenderer(QByteArray(svg_str_colored.encode("utf-8")))
     
-    scaled_size = int(size * dpr)
+    import math
+    scaled_size = math.ceil(size * dpr)
     pixmap = QPixmap(scaled_size, scaled_size)
     pixmap.fill(Qt.transparent)
     pixmap.setDevicePixelRatio(dpr)
@@ -192,7 +193,10 @@ def get_svg_pixmap(name: str, color: str = "#333333", size: int = 16) -> QPixmap
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
     painter.setRenderHint(QPainter.SmoothPixmapTransform)
-    renderer.render(painter)
+    
+    # Render explicitly into the logical bounding box to prevent clipping/shifting
+    target_rect = QRectF(0, 0, size, size)
+    renderer.render(painter, target_rect)
     painter.end()
     
     return pixmap
